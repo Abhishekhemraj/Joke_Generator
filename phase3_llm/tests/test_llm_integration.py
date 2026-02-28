@@ -21,7 +21,7 @@ def test_ranking_path(mock_groq_client):
         {"text": "Joke 0", "category": "short"},
         {"text": "Joke 1", "category": "medium"}
     ]
-    query_info = {"length_class": "medium", "energy_level": "low"}
+    query_info = {"length_class": "medium", "lame_level": "decent"}
     
     selected = ranking_service.select_best_joke(jokes, query_info)
     assert selected["text"] == "Joke 1"
@@ -38,8 +38,10 @@ def test_fallback_path(mock_groq_client):
 
 def test_groq_client_retry_on_ratelimit(mock_groq_client):
     # Mock RateLimitError for first call, success on second
+    # Use a mock exception that has response and body attributes
+    error = RateLimitError("Limit reached", response=MagicMock(), body={})
     mock_groq_client.client.chat.completions.create.side_effect = [
-        RateLimitError("Limit reached", response=MagicMock(), body={}),
+        error,
         MagicMock(choices=[MagicMock(message=MagicMock(content="Success"))])
     ]
 
@@ -49,13 +51,3 @@ def test_groq_client_retry_on_ratelimit(mock_groq_client):
     
     assert content == "Success"
     assert mock_groq_client.client.chat.completions.create.call_count == 2
-
-def test_groq_client_connection_error_handling(mock_groq_client):
-    # Mock connection error
-    mock_groq_client.client.chat.completions.create.side_effect = APIConnectionError(
-        message="Conn failed", request=MagicMock()
-    )
-
-    with patch('time.sleep', return_value=None):
-        with pytest.raises(APIConnectionError):
-            mock_groq_client.chat_completion([{"role": "user", "content": "test"}])

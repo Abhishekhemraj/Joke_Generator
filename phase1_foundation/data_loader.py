@@ -19,12 +19,15 @@ def load_jokes(file_path: str) -> List[Dict[str, str]]:
             reader = csv.DictReader(file)
             for row in reader:
                 text = row.get(config.COL_TEXT, "")
+                lame_score = row.get("lame_score", "2")
                 if text:
                     category = classify_joke(text)
                     jokes.append({
                         "text": text,
-                        "category": category
+                        "category": category,
+                        "lame_score": int(lame_score)
                     })
+
         
         logger.info(f"Successfully loaded {len(jokes)} jokes.")
     except Exception as e:

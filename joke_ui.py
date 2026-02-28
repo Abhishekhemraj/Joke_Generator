@@ -167,9 +167,10 @@ def main():
         with col1:
             length = st.selectbox("📏 JOKE LENGTH", options=["short", "medium", "long"], index=1)
         with col2:
-            lameness_options = {"Low": "witty", "Medium": "average", "High": "cringe"}
-            lameness_user = st.selectbox("🥴 CRINGE METER", options=list(lameness_options.keys()), index=1)
-            lameness_internal = lameness_options[lameness_user]
+            lame_options = {"Highly Lame": "high", "Moderately Lame": "moderate", "Decent Joke": "decent"}
+            lame_user = st.selectbox("🥴 LAME-O-METER", options=list(lame_options.keys()), index=1)
+            lame_internal = lame_options[lame_user]
+
 
         st.write("") 
         generate_btn = st.button("🎤 Generate a Joke")
@@ -179,7 +180,8 @@ def main():
         st.session_state.audio_sync += 1 # Important: ensures the audio HTML is unique and retriggers autoplay
         with st.spinner("Cooking up something funny..."):
             try:
-                response_json = app.get_joke(length, lameness_internal)
+                response_json = app.get_joke(length, lame_internal)
+
                 data = json.loads(response_json)
                 
                 if data["status"] == "success":
